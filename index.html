@@ -1,273 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>For my Ellie <3 </title>
-    <style>
-        body {
-            background: #000;
-            text-align: center;
-            font-family: 'Poppins', sans-serif;
-            color: #ff80ab;
-            overflow: hidden;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
+<script>
+    const placedImages = []; // store previous image positions
+
+    function getElementRect(element) {
+        const rect = element.getBoundingClientRect();
+        return {
+            x: rect.left + rect.width/2,
+            y: rect.top + rect.height/2,
+            size: Math.max(rect.width, rect.height)
+        };
+    }
+
+    function isOverlapping(x, y, size) {
+        // check against previously placed images
+        for (const img of placedImages) {
+            const dx = x - img.x;
+            const dy = y - img.y;
+            const distance = Math.sqrt(dx*dx + dy*dy);
+            if (distance < (size/2 + img.size/2 + 20)) return true;
         }
 
-        .message {
-            font-size: 20px;
-            max-width: 600px;
-            margin: 50px auto 20px;
-            opacity: 0;
-            animation: fadeInText 4s forwards;
-            white-space: pre-line;
+        // check against main image
+        const mainImg = document.getElementById('loveImage');
+        if (mainImg) {
+            const rect = getElementRect(mainImg);
+            const dx = x - rect.x;
+            const dy = y - rect.y;
+            const distance = Math.sqrt(dx*dx + dy*dy);
+            if (distance < (size/2 + rect.size/2 + 20)) return true;
         }
 
-        @keyframes fadeInText {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
+        // check against text messages
+        const texts = document.querySelectorAll('.message, #loveText');
+        texts.forEach(text => {
+            const rect = getElementRect(text);
+            const dx = x - rect.x;
+            const dy = y - rect.y;
+            const distance = Math.sqrt(dx*dx + dy*dy);
+            if (distance < (size/2 + rect.size/2 + 20)) return true;
+        });
 
-        .heart {
-            position: relative;
-            width: 100px;
-            height: 90px;
-            margin: 40px auto 20px;
-            background-color: #e91e63;
-            transform: rotate(-45deg);
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
+        return false;
+    }
 
-        .heart::before,
-        .heart::after {
-            content: "";
-            position: absolute;
-            width: 100px;
-            height: 90px;
-            background-color: #e91e63;
-            border-radius: 50%;
-        }
+    // Extra images that don't overlap
+    const extraImages = ['love2.jpeg','love3.jpeg','love4.jpeg','love5.jpeg'];
 
-        .heart::before {
-            top: -50px;
-            left: 0;
-        }
+    function spawnImage(src) {
+        const img = document.createElement('img');
+        img.src = src;
+        img.className = 'floating-image';
+        const maxAttempts = 50;
+        let size = 150 + Math.random() * 150;
+        let x, y;
+        let attempts = 0;
 
-        .heart::after {
-            left: 50px;
-            top: 0;
-        }
+        do {
+            x = Math.random() * (window.innerWidth - size);
+            y = Math.random() * (window.innerHeight - size);
+            attempts++;
+        } while (isOverlapping(x + size/2, y + size/2, size) && attempts < maxAttempts);
 
-        .heart:hover {
-            transform: rotate(-45deg) scale(1.1);
-        }
+        img.style.width = `${size}px`;
+        img.style.left = `${x}px`;
+        img.style.top = `${y}px`;
+        document.body.appendChild(img);
+        setTimeout(() => img.style.opacity = '1', 200);
 
-        h1 {
-            font-size: 36px;
-            margin-top: 20px;
-            color: #ff4081;
-            opacity: 0;
-            transition: opacity 1s ease;
-        }
+        placedImages.push({x: x + size/2, y: y + size/2, size});
+    }
 
-        #loveImage {
-            width: 300px;
-            border-radius: 15px;
-            box-shadow: 0 0 25px rgba(255, 64, 129, 0.6);
-            opacity: 0;
-            transition: opacity 1s ease;
-            display: block;
-            margin: 20px auto;
-        }
-
-        .floating-message {
-            position: absolute;
-            color: #ffb6c1;
-            font-size: 18px;
-            opacity: 0;
-            animation: floatUp 5s ease forwards;
-            pointer-events: none;
-            text-shadow: 0 0 10px rgba(255, 182, 193, 0.7);
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 0; transform: translateY(20px); }
-            10% { opacity: 1; }
-            80% { opacity: 1; transform: translateY(-20px); }
-            100% { opacity: 0; transform: translateY(-40px); }
-        }
-
-        .floating-image {
-            position: absolute;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
-            opacity: 0;
-            transition: opacity 2s ease;
-        }
-
-        #exitButton {
-            position: fixed;
-            top: 20px;
-            right: 25px;
-            background: rgba(255, 64, 129, 0.8);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            padding: 8px 16px;
-            cursor: pointer;
-            font-size: 14px;
-            display: none;
-            transition: background 0.3s ease;
-            z-index: 1000;
-        }
-
-        #exitButton:hover {
-            background: rgba(255, 64, 129, 1);
-        }
-    </style>
-</head>
-<body>
-    <button id="exitButton" onclick="exitFullscreen()">Exit Fullscreen</button>
-
-    <div class="message">
-        I know life has been really hard on you lately,<br>
-        so I decided I would make you a little gift to cheer you up.
-    </div>
-
-    <div id="heartContainer">
-        <div class="heart" id="heart" onclick="showGift()"></div>
-    </div>
-
-    <h1 id="loveText">I love you &lt;3</h1>
-
-    <audio id="song" src="alrighty_aphrodite.mp3"></audio>
-
-    <script>
-        const placedImages = []; // store previous image positions
-
-        function isOverlapping(x, y, size) {
-            for (const img of placedImages) {
-                const dx = x - img.x;
-                const dy = y - img.y;
-                const distance = Math.sqrt(dx*dx + dy*dy);
-                if (distance < (size/2 + img.size/2 + 20)) { // buffer 20px
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        async function showGift() {
-            const heart = document.getElementById('heart');
-            const container = document.getElementById('heartContainer');
-            const loveText = document.getElementById('loveText');
-            const song = document.getElementById('song');
-            const exitButton = document.getElementById('exitButton');
-
-            try {
-                if (document.documentElement.requestFullscreen) {
-                    await document.documentElement.requestFullscreen();
-                } else if (document.documentElement.webkitRequestFullscreen) {
-                    await document.documentElement.webkitRequestFullscreen();
-                }
-            } catch (err) {
-                console.log("Fullscreen failed:", err);
-            }
-
-            exitButton.style.display = 'block';
-            heart.style.display = 'none';
-
-            const img = document.createElement('img');
-            img.src = 'love.jpg';
-            img.id = 'loveImage';
-            img.alt = 'Love Image';
-            container.appendChild(img);
-
-            img.onload = () => {
-                img.style.opacity = '1';
-                setTimeout(() => loveText.style.opacity = '1', 800);
-            };
-
-            song.play().catch(err => console.log("Autoplay blocked:", err));
-
-            const messages = [
-                "You know, you're really cute.",
-                "I hope this made you smile.",
-                "Bleh bleh bleehhhh",
-                "I really care about you.",
-                "You’re my princess",
-                "I wish I could hug you right now.",
-                "You’re my favourite person."
-            ];
-
-            function spawnMessage() {
-                const msg = document.createElement('div');
-                msg.className = 'floating-message';
-                msg.textContent = messages[Math.floor(Math.random() * messages.length)];
-
-                const x = Math.random() * (window.innerWidth - 200);
-                const y = Math.random() * (window.innerHeight - 100);
-                msg.style.left = `${x}px`;
-                msg.style.top = `${y}px`;
-
-                document.body.appendChild(msg);
-                setTimeout(() => msg.remove(), 5000);
-
-                const next = 10000 + Math.random() * 5000;
-                setTimeout(spawnMessage, next);
-            }
-
-            setTimeout(spawnMessage, 10000);
-
-            // Extra images that don't overlap
-            const extraImages = ['love2.jpeg','love3.jpeg','love4.jpeg','love5.jpeg'];
-
-            function spawnImage(src) {
-                const img = document.createElement('img');
-                img.src = src;
-                img.className = 'floating-image';
-                const maxAttempts = 50;
-                let size = 150 + Math.random() * 150;
-                let x, y;
-                let attempts = 0;
-
-                do {
-                    x = Math.random() * (window.innerWidth - size);
-                    y = Math.random() * (window.innerHeight - size);
-                    attempts++;
-                } while (isOverlapping(x + size/2, y + size/2, size) && attempts < maxAttempts);
-
-                img.style.width = `${size}px`;
-                img.style.left = `${x}px`;
-                img.style.top = `${y}px`;
-                document.body.appendChild(img);
-                setTimeout(() => img.style.opacity = '1', 200);
-
-                placedImages.push({x: x + size/2, y: y + size/2, size});
-            }
-
-            extraImages.forEach((src, i) => {
-                setTimeout(() => {
-                    spawnImage(src);
-                }, (15000 + Math.random() * 10000) * (i + 1));
-            });
-        }
-
-        function exitFullscreen() {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
-            document.getElementById('exitButton').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
-
-
+    // Spawn images with delay
+    extraImages.forEach((src, i) => {
+        setTimeout(() => {
+            spawnImage(src);
+        }, (15000 + Math.random() * 10000) * (i + 1));
+    });
+</script>
