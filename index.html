@@ -1,65 +1,48 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Valentine’s Day</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
 
-body {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f6d1d8, #fdecef);
-  font-family: 'Inter', sans-serif;
-  color: #3a2a2a;
-}
+  <main class="card">
+    <h1>Happy Valentine’s Day</h1>
+    <p class="subtitle">A small reminder that kindness, care, and warmth matter.</p>
 
-.card {
-  background: #ffffffee;
-  backdrop-filter: blur(6px);
-  padding: 3rem 2.5rem;
-  max-width: 480px;
-  text-align: center;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-}
+    <p class="message">
+      Whether today is loud or quiet, shared or solitary, it still deserves a little beauty.
+      May your day be gentle, sincere, and full of moments that feel real.
+    </p>
 
-.question {
-  margin-top: 2rem;
-}
+    <div class="question">
+      <p class="question-text">Will you be my Valentine?</p>
+      <div class="buttons">
+        <button class="yes" onclick="accepted()">Yes</button>
+        <button class="no" onmouseenter="moveNo(this)">No</button>
+      </div>
+      <p id="response"></p>
+    </div>
 
-.question-text {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
-}
+    <footer>
+      <span>♥</span>
+    </footer>
+  </main>
 
-.buttons {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-}
+  <script>
+    function moveNo(btn) {
+      const x = Math.random() * 300 - 150;
+      const y = Math.random() * 200 - 100;
+      btn.style.transform = `translate(${x}px, ${y}px)`;
+    }
 
-button {
-  padding: 0.6rem 1.8rem;
-  border-radius: 30px;
-  border: none;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
+    function accepted() {
+      document.getElementById('response').textContent = 'Best choice ♥';
+    }
+  </script>
 
-button.yes {
-  background: #e63963;
-  color: white;
-}
-
-button.no {
-  background: #f2b5c4;
-  color: #3a2a2a;
-}
-
-#response {
-  margin-top: 1.5rem;
-  font-weight: 500;
-}
+</body>
+</html>
